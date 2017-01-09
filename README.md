@@ -1,5 +1,8 @@
 # simpleqe
 
+
+(This write-up has to improve!)
+
 Weighted distance-based quality (postediting time) estimation
 The programme reads three training files and three testing files
 Three files: 
