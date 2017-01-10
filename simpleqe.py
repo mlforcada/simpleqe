@@ -8,8 +8,7 @@
 # The program performs a grid search in parameter space (2 parameters: alpha 
 # and beta).
 
-# To do (20170109)
-# Precompute or cache tokenization (it's slow!)
+# To do (20170110)
 # Look for ways to avoid expensive mpmath computation of exponentials
 # Allow to optimize just alpha or just beta
 
@@ -82,8 +81,20 @@ beta1 = args.low_beta
 beta2 = args.high_beta
 points = args.npoints
 
-train_zipped=zip(train_pe_time,train_source,train_mt)  # 0 is time, 1 is source, 2 is mt
-test_zipped=zip(test_pe_time,test_source,test_mt)
+
+# Tokenize as the input is zipped (using lambda (!))
+# This could be written more nicely I assume
+# idea taken from http://stackoverflow.com/questions/8372399/zip-with-list-output-instead-of-tuple
+if args.tokenize :
+   postzip = lambda a,b,c : [ [ q[0], word_tokenize(q[1]), word_tokenize(q[2]) ] for q in zip(a,b,c) ]
+elif args.character :
+   postzip = lambda a,b,c : [ [ q[0], q[1], q[2] ] for q in zip(a,b,c) ]
+else : # poor man's tokenization
+   postzip = lambda a,b,c : [ [ q[0], q[1].split() , q[2].split ] for q in zip(a,b,c) ]
+
+# Input is tokenized before zipping.
+train_zipped=postzip(train_pe_time,train_source,train_mt)  # 0 is time, 1 is source, 2 is mt
+test_zipped=postzip(test_pe_time,test_source,test_mt)
 # print len(test_zipped)
 
 dscache=[]   # rudimentary cache for ds and dmt below
@@ -107,39 +118,11 @@ for ia in range(0,points+1) :
     for test in test_zipped :
         numerator=0
         denominator=0
-        # convert train to an appropriate sequence
-        # it should be possible to precompute or cache this
-        if args.character :
-              # Do nut'n                 
-              tes=test[1]
-              temt=test[2]
-        elif args.tokenize :
-              # NLTK word tokenizer
-              tes=word_tokenize(test[1])
-              temt=word_tokenize(test[2])
-        else : 
-              # Poor man's tokenization
-              tes=test[1].split()
-              temt=train[2].split() 
         for train in train_zipped :
-           # convert train to an appropriate sequence
-           # it should be possible to precompute or cache this
-           if args.character :
-              # Do nut'n                 
-              trs=train[1]
-              trmt=train[2]
-           elif args.tokenize :
-              # NLTK word tokenizer
-              trs=word_tokenize(train[1])
-              trmt=word_tokenize(train[2])
-           else : 
-              # Poor man's tokenization
-              trs=train[1].split()
-              trmt=train[2].split()
 	   if dscache[i]==-1 :
-                ds=levenshtein(tes,trs)
+                ds=levenshtein(test[1],train[1])
                 dscache[i]=ds
-                dmt=levenshtein(temt,trmt)
+                dmt=levenshtein(test[2],train[2])
                 dmtcache[i]=dmt
            else :
                 ds=dscache[i]
