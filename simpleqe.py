@@ -8,10 +8,9 @@
 # The program performs a grid search in parameter space (2 parameters: alpha 
 # and beta).
 
-# To do (20170110)
-# Look for ways to avoid expensive mpmath computation of exponentials
+# To do (20170111)
 # Allow to optimize just alpha or just beta
-
+# Lowercasing
 
 import sys
 import argparse
@@ -66,6 +65,7 @@ parser.add_argument("npoints", type=int, help="Number of points")
 parser.add_argument("--tokenize", action="store_true", dest="tokenize", help="Use advanced tokenization (default: word and space-based)")
 parser.add_argument("--character", action="store_true", dest="character", help="Use character-based edit distance (default: word-based")
 parser.add_argument("--mae", action="store_true", dest="mae", default=False, help="Minimize according to MAE (default RMSE)")
+parser.add_argument("--verbose", action="store_true", dest="verbose", default="False", help="Print each calculation")
 args=parser.parse_args()
 
 
@@ -103,22 +103,37 @@ for i in range(len(train_zipped)*len(test_zipped)) :
     dscache.append(-1)
     dmtcache.append(-1)
 
+# cache for exponentials
+expcache = [None] * len(train_zipped)
+
+# Exponent ranges precomputed to use mpmath only if necessary
+epsilon =0.01 # for safety, can be zero
+safeminval = (1-epsilon)*math.log(sys.float_info.min)
+safemaxval = (1-epsilon)*math.log(sys.float_info.max)
+saferange = safemaxval-safeminval
+safemidval = (safemaxval+safeminval)/2
+
+# Initialize optimal values to starting values
 bestalpha=alpha1
 bestbeta=beta1
 besterr=float("inf")
 
+
 for ia in range(0,points+1) :
   for ib in range(0,points+1) :
-    i=0; # cache index
+    i=0  # cache index
     currentalpha = alpha1 + (alpha2-alpha1)*ia/points
     currentbeta = beta1 + (beta2-beta1)*ib/points
     forRMSE=0
     forMAE=0
     test_samples=0
     for test in test_zipped :
-        numerator=0
-        denominator=0
-        for train in train_zipped :
+        using_mpmath=False
+        minexp=float("inf") # building a range for the exponential
+        maxexp=-float("inf")  # building a range for the exponential
+        iexp = 0 # exponential cache index
+        for train in train_zipped : # first loop over train just computes  
+                                    # exponents and their ranges
 	   if dscache[i]==-1 :
                 ds=levenshtein(test[1],train[1])
                 dscache[i]=ds
@@ -128,23 +143,55 @@ for ia in range(0,points+1) :
                 ds=dscache[i]
                 dmt=dmtcache[i]
            exponent=-currentalpha*ds-currentbeta*dmt
-           if math.fabs(exponent) > 700 : # +709.7827 or -745.133 for regular floats 
-              factor=mpmath.exp(exponent)
+           expcache[iexp]=exponent
+           iexp = iexp + 1
+           if exponent<minexp :
+                 minexp = exponent
+           if exponent>maxexp :
+                 maxexp = exponent
+           i = i + 1 # next train--test pair in cache
+        # end for
+
+        # To avoid using mpmath
+        # The range must fit in that of regular floats
+        # In that case, values are centered using an offset
+        exprange=maxexp-minexp
+        expmiddle=(maxexp+minexp)/2
+        if exprange < saferange : 
+           using_mpmath=False
+           offset=safemidval-expmiddle
+        else :   
+           using_mpmath=True
+
+        iexp = 0 # exponential cache index
+        numerator=0
+        denominator=0
+        for train in train_zipped :  # second loop over train computes
+                                     # the actual weight of each example
+           if using_mpmath : # for this test example
+              factor=mpmath.exp(expcache[iexp]) 
+              print "Used mpmath:", i, iexp, expcache[iexp]
            else:
-              factor=math.exp(exponent)
+              factor=math.exp(offset+expcache[iexp])  # the offset affects
+                                                      # all terms in the
+                                                      # numerator and the
+                                                      # denominator
+           iexp = iexp + 1
            numerator = numerator + factor*float(train[0])
            denominator = denominator + factor
-           i = i + 1 # next train--test pair in cache
-#        print denominator
+
+
+        # end for
         predicted_time = numerator / denominator
         test_samples = test_samples + 1
         dev=predicted_time-float(test[0])
         forRMSE = forRMSE + dev*dev
         forMAE = forMAE + math.fabs(dev)
-#        print predicted_time,float(test[0])
+
     RMSE = math.sqrt(forRMSE/test_samples)
     MAE = forMAE/test_samples
-#    print currentalpha, currentbeta, err
+    if args.verbose :
+         print currentalpha, currentbeta, RMSE, MAE 
     if args.mae : 
          err=MAE
     else :
