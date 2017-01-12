@@ -65,8 +65,9 @@ parser.add_argument("npoints", type=int, help="Number of points")
 parser.add_argument("--tokenize", action="store_true", dest="tokenize", help="Use advanced tokenization (default: word and space-based)")
 parser.add_argument("--character", action="store_true", dest="character", help="Use character-based edit distance (default: word-based")
 parser.add_argument("--mae", action="store_true", dest="mae", default=False, help="Minimize according to MAE (default RMSE)")
-parser.add_argument("--verbose", action="store_true", dest="verbose", default="False", help="Print each calculation")
+parser.add_argument("--verbose", action="store_true", dest="verbose", default=False, help="Print each calculation")
 args=parser.parse_args()
+
 
 
 train_pe_time = readdata(args.tr_time)
@@ -170,7 +171,8 @@ for ia in range(0,points+1) :
                                      # the actual weight of each example
            if using_mpmath : # for this test example
               factor=mpmath.exp(expcache[iexp]) 
-              print "Used mpmath:", i, iexp, expcache[iexp]
+              if args.verbose :
+                 print "Used mpmath:", i, iexp, expcache[iexp]
            else:
               factor=math.exp(offset+expcache[iexp])  # the offset affects
                                                       # all terms in the
@@ -200,7 +202,6 @@ for ia in range(0,points+1) :
          besterr = err
          bestalpha = currentalpha
          bestbeta = currentbeta
- 
          print bestalpha, bestbeta, "RMSE=", RMSE, "MAE=", MAE
     
 print "Best of", test_samples, ":"
