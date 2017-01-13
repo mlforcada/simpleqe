@@ -66,6 +66,8 @@ parser.add_argument("--tokenize", action="store_true", dest="tokenize", help="Us
 parser.add_argument("--character", action="store_true", dest="character", help="Use character-based edit distance (default: word-based")
 parser.add_argument("--mae", action="store_true", dest="mae", default=False, help="Minimize according to MAE (default RMSE)")
 parser.add_argument("--verbose", action="store_true", dest="verbose", default=False, help="Print each calculation")
+parser.add_argument("--alpha_only", action="store_true", dest="alpha_only", default=False, help="Optimize alpha only")
+parser.add_argument("--beta_only", action="store_true", dest="beta_only", default=False, help="Optimize alpha only")
 args=parser.parse_args()
 
 
@@ -119,9 +121,17 @@ bestalpha=alpha1
 bestbeta=beta1
 besterr=float("inf")
 
+if args.alpha_only :
+   brange = range(1)
+else :
+   brange=range(0,points+1)
+if args.beta_only :
+   arange= range(1)
+else :
+   arange=range(0,points+1)
 
-for ia in range(0,points+1) :
-  for ib in range(0,points+1) :
+for ia in arange :
+  for ib in brange :
     i=0  # cache index
     currentalpha = alpha1 + (alpha2-alpha1)*ia/points
     currentbeta = beta1 + (beta2-beta1)*ib/points
