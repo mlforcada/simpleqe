@@ -7,9 +7,7 @@
 # Three files: (1) time measurement, (2) source segment, (3) MTed segment
 # The program computes average times per source character, per source 
 # word, per machine translated characters and per machine translated word, 
-# and computes the error over the source text.
-# and beta).
-
+# and computes the MAE and RMSE errors over the test corpus.
 
 import sys
 import argparse
