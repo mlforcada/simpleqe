@@ -7,10 +7,10 @@
 # Three files: (1) time measurement, (2) source segment, (3) MTed segment
 # The program performs a grid search in parameter space (2 parameters: alpha 
 # and beta).
+# When the grid is 1 x 1, can be used to test
 
-# To do (20170111)
-# Allow to optimize just alpha or just beta
-# Lowercasing
+# To do (20170126)
+# Lowercasing (not lowercased)
 
 import sys
 import argparse
@@ -18,6 +18,7 @@ import argparse
 import math
 import random
 import mpmath # to avoid underflows in exponentials
+import os 
 
 # Incorporating a better tokenizer which is Unicode-aware
 from nltk.tokenize import word_tokenize
@@ -68,6 +69,7 @@ parser.add_argument("--mae", action="store_true", dest="mae", default=False, hel
 parser.add_argument("--verbose", action="store_true", dest="verbose", default=False, help="Print each calculation")
 parser.add_argument("--alpha_only", action="store_true", dest="alpha_only", default=False, help="Optimize alpha only")
 parser.add_argument("--beta_only", action="store_true", dest="beta_only", default=False, help="Optimize alpha only")
+parser.add_argument("--produce_output", nargs=1, dest="filename", help="Write output file")
 args=parser.parse_args()
 
 
@@ -129,6 +131,10 @@ if args.beta_only :
    arange= range(1)
 else :
    arange=range(0,points+1)
+
+
+if args.filename :
+   out = open(args.filename[0],"w")
 
 for ia in arange :
   for ib in brange :
@@ -195,6 +201,8 @@ for ia in arange :
 
         # end for
         predicted_time = numerator / denominator
+        if args.filename:
+             out.write("AlaShefLen_word_mt\t{0}\t{1}".format(iexp,predicted_time)+os.linesep)   
         test_samples = test_samples + 1
         dev=predicted_time-float(test[0])
         forRMSE = forRMSE + dev*dev
@@ -216,4 +224,5 @@ for ia in arange :
     
 print "Best of", test_samples, ":"
 print bestalpha, bestbeta, besterr            
-
+if args.filename : 
+   out.close()
