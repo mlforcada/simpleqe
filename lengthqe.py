@@ -13,6 +13,7 @@ import sys
 import argparse
 import random
 import math
+import os
 
 # Incorporating a better tokenizer which is Unicode-aware
 from nltk.tokenize import word_tokenize
@@ -38,7 +39,7 @@ parser.add_argument("te_source", help="Testing source segments")
 parser.add_argument("te_mt", help="Testing MTed segments")
 parser.add_argument("--mae_search", nargs=3, dest="mae_search", help="Lowest, Highest, Number of points")
 parser.add_argument("--verbose", action="store_true", dest="verbose", default=False, help="Print each calculation")
-
+parser.add_argument("--produce_output", nargs=1, dest="fileprefix", help="Produce output for MAE-optimized")
 args=parser.parse_args()
 
 
@@ -229,18 +230,38 @@ RMSEopt_RMSE_word_source=0
 RMSEopt_RMSE_char_mt=0
 RMSEopt_RMSE_word_mt=0
 
+
+if args.fileprefix :
+   out_char_source=open(args.fileprefix[0]+"_char_source.result", "w")
+   out_word_source=open(args.fileprefix[0]+"_word_source.result", "w")
+   out_char_mt=open(args.fileprefix[0]+"_char_mt.result", "w")
+   out_word_mt=open(args.fileprefix[0]+"_word_mt.result", "w")
+
 ntest=len(test_zipped)
+counter=0
 for test in test_zipped :
+ 
+   counter=counter+1
 
    t_char_source=a_char_source*test[1]
    t_word_source=a_word_source*test[2]
    t_char_mt=a_char_mt*test[3]
    t_word_mt=a_word_mt*test[4]
 
+
    MAEopt_MAE_char_source = MAEopt_MAE_char_source+math.fabs(test[0]-best_a_char_source*test[1])
    MAEopt_MAE_word_source = MAEopt_MAE_word_source+math.fabs(test[0]-best_a_word_source*test[2])
    MAEopt_MAE_char_mt     = MAEopt_MAE_char_mt    +math.fabs(test[0]-best_a_char_mt*test[3])
    MAEopt_MAE_word_mt     = MAEopt_MAE_word_mt    +math.fabs(test[0]-best_a_word_mt*test[4])
+
+
+   if args.fileprefix : 
+       
+      out_char_source.write("AlaShefLen_char_source+\t{0}\t{1}".format(counter,best_a_char_source*test[1])+os.linesep)
+      out_word_source.write("AlaShefLen_word_source\t{0}\t{1}".format(counter,best_a_word_source*test[2])+os.linesep)
+      out_char_mt.write("AlaShefLen_char_mt\t{0}\t{1}".format(counter,best_a_char_mt*test[3])+os.linesep)
+      out_word_mt.write("AlaShefLen_word_mt\t{0}\t{1}".format(counter,best_a_word_mt*test[4])+os.linesep)   
+
 
    MAEopt_RMSE_char_source = MAEopt_RMSE_char_source+(test[0]-best_a_char_source*test[1])*(test[0]-best_a_char_source*test[1])
    MAEopt_RMSE_word_source = MAEopt_RMSE_word_source+(test[0]-best_a_word_source*test[2])*(test[0]-best_a_word_source*test[2])
@@ -256,6 +277,8 @@ for test in test_zipped :
    RMSEopt_RMSE_word_source = RMSEopt_RMSE_word_source+(test[0]-a_word_source*test[2])*(test[0]-a_word_source*test[2])
    RMSEopt_RMSE_char_mt     = RMSEopt_RMSE_char_mt    +(test[0]-a_char_mt*test[3])*(test[0]-a_char_mt*test[3])
    RMSEopt_RMSE_word_mt     = RMSEopt_RMSE_word_mt    +(test[0]-a_word_mt*test[4])*(test[0]-a_word_mt*test[4])
+
+# end for test in test_zipped
 
 print "-------------"
 print "RMSE for RMSE-optimized values (over test set):"
@@ -282,7 +305,11 @@ print "MAE, word, source =", MAEopt_MAE_word_source/ntest,            " ; rate="
 print "MAE, char, mt     =", MAEopt_MAE_char_mt/ntest,                " ; rate=", best_a_char_mt,     " s/char"
 print "MAE, word, mt     =", MAEopt_MAE_word_mt/ntest,                " ; rate=", best_a_word_mt,     " s/word"
 
-     
+if args.fileprefix :
+   out_char_source.close()
+   out_word_source.close()
+   out_char_mt.close()
+   out_word_mt.close()
 
          
 
