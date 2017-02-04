@@ -7,6 +7,9 @@ import subprocess
 from nltk.tokenize import word_tokenize
 import argparse
 import sys
+import math
+import numpy as np
+from scipy.optimize import minimize
 
 
 def readdata(filename):
@@ -47,7 +50,6 @@ parser.add_argument("tr_mt", help="Training MTed segments")
 
 
 
-
 # Ngram size
 parser.add_argument('-m', '--maxngram', help='Maximum ngram size', type=int, default=3)
 
@@ -71,10 +73,12 @@ directory="/home/mlf/apertium-sources/apertium-en-es"
 # segment translations will be held in a cache
 cache={}
 
+hits = [[0 for x in range(args.maxngram+1)] for y in range(len(training_data))] 
 
-for train in training_data :
-   source=train[1]
-   target=train[2]
+
+for m, (time, source, target) in enumerate(training_data) :
+#   source=train[1]
+#   target=train[2]
    if args.verbose :
       print source
       print target
@@ -101,9 +105,11 @@ for train in training_data :
 
       
    # Now run the thing
-   hits=(args.maxngram+1)*[0]
+   hits[m][0]=len(source_tok) # Store length for zero-grams
+   if args.verbose :
+     print "Length=", hits[m][0]
    for n in range(1,args.maxngram+1) :
-     hits[n]=0
+     hits[m][n]=0
      for i in range(len(source_tok)-n+1):
        seg=" ".join(source_tok[i:i+n])
        res=cache[seg]
@@ -111,16 +117,33 @@ for train in training_data :
        if len(res_tok) :
           found_tok=subfinder(target_tok,res_tok)
        if found_tok : 
-#          print "( ",seg," : ", res, ")" 
-          hits[n] = hits[n] + float(len(source_tok))/float((len(source_tok)-n+1))
+       #   print "( ",seg," : ", res, ")"
+       #   print float(len(source_tok))/float((len(source_tok)-n+1)) 
+          hits[m][n] = hits[m][n] + float(len(source_tok))/float((len(source_tok)-n+1))
      if args.verbose :
-        print "Ngram=", n, " Hits=", hits[n]
+        print "Ngram=", n, " Hits=", hits[m][n]
 
 # End for train
 
 
 
+# Now I have to construct the loss function
+# To be minimized via Nelder-Mead
+# Can I define the function on the fly?
 
+def mae(a) :
+   MAE=0
+   for m, (time, source, target) in enumerate(training_data) :
+      dev=float(time)
+      for n in range(0,args.maxngram+1) :
+         dev=dev+a[n]*hits[m][n]
+      MAE=MAE+math.fabs(dev)
+   return MAE/len(training_data)
+ 
 
+a0=np.array([0 for y in range(args.maxngram+1)]) # start with zeros
 
+res = minimize(mae, a0, method='nelder-mead', options={'fatol' : 1e-4, 'disp': args.verbose})
+
+print res
 
