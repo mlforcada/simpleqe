@@ -142,7 +142,7 @@ def mae(a) :
    for m, (time, source, target) in enumerate(training_data) :
       dev=float(time)
       for n in range(0,args.maxngram+1) :
-         dev=dev+a[n]*hits[m][n]
+         dev=dev-a[n]*hits[m][n]
       MAE=MAE+math.fabs(dev)
    return MAE/len(training_data)
  
@@ -152,25 +152,25 @@ def mae(a) :
 a0=np.array([0 for y in range(args.maxngram+1)])
 
 # Optimize to an error of 0.0001 in MAE
-res = minimize(mae, a0, method='nelder-mead', options={'fatol' : 1e-4, 'disp': args.verbose})
+result = minimize(mae, a0, method='nelder-mead', options={'fatol' : 1e-4, 'disp': True})
 
-print "Result=", res.x
-print "Length coefficient=", (res.x)[0]
+print "Result=", result.x
+print "Length coefficient=", (result.x)[0]
 for n in range(1,args.maxngram+1):
-   print n,"-gram coefficient=", (res.x)[n]
-print "Training set MAE=", mae(res.x)
+   print n,"-gram coefficient=", (result.x)[n]
+print "Training set MAE=", mae(result.x)
 
 
 
 # Now compute MAE over test set
 
-testhits = [0 for x in range(args.maxngram+1)]]
+testhits = [0 for x in range(args.maxngram+1)]
 
 MAE=0.0
 
 for m, (time, source, target) in enumerate(test_data) :
-#   source=train[1]
-#   target=train[2]
+#   source=test[1]
+#   target=test[2]
    if args.verbose :
       print source
       print target
@@ -215,10 +215,12 @@ for m, (time, source, target) in enumerate(test_data) :
         print "Ngram=", n, " Hits=", testhits[n]
 
 # Compute contribution to MAE
-     dev=float(time)
-     for n in range(0,args.maxngram+1) :
-         dev=dev+a[n]*testhits[n]
-     MAE=MAE+math.fabs(dev)/len(test_data)
+   prediction=0
+   for n in range(0,args.maxngram+1) :
+      prediction=prediction+float((result.x)[n])*testhits[n]
+   if args.verbose :
+      print "Prediction={0} Time={1}".format(prediction, time)
+   MAE=MAE+math.fabs(float(time)-prediction)/len(test_data)
 # End for train
 
 print "Test set MAE=", MAE
