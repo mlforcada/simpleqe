@@ -55,10 +55,13 @@ parser.add_argument("te_mt", help="Test MTed segments")
 
 
 # Ngram size
-parser.add_argument('-m', '--maxngram', help='Maximum ngram size', type=int, default=3)
-
+parser.add_argument('--maxngram', help='Maximum ngram size', type=int, default=3)
 # Verbose
 parser.add_argument('-v', '--verbose', help='Verbose Mode', dest="verbose", action='store_true',default=False)
+
+# Optimization
+parser.add_argument('--maxiter', help="Maximum number of iterations (default 200)", type=int, default=200)
+
 
 # Parse them
 args=parser.parse_args()
@@ -112,6 +115,7 @@ for m, (time, source, target) in enumerate(training_data) :
 
    # I'll do the reverse cache later
 
+
       
    # Now run the thing
    hits[m][0]=len(source_tok) # Store length for zero-grams
@@ -134,6 +138,9 @@ for m, (time, source, target) in enumerate(training_data) :
 	
 # End for train
 
+if args.verbose :
+   for key in cache :
+      print "((( " + key + " ::: " + cache[key] + ")))"
 
 
 # Can I move this function definition to the top?
@@ -151,8 +158,16 @@ def mae(a) :
 
 a0=np.array([0 for y in range(args.maxngram+1)])
 
-# Optimize to an error of 0.0001 in MAE
-result = minimize(mae, a0, method='nelder-mead', options={'fatol' : 1e-4, 'disp': True})
+# Optimize to an error of 0.0001 in MAE (will change later, can also use BFGS)
+result = minimize(mae, a0, method='nelder-mead', options={'fatol' : 1e-4, 'disp' : True, 'maxiter' : args.maxiter})
+
+if result.success :
+   print "Optimization successful in {0} iterations".format(result.nit) 
+else : 
+   print "Optimization unsuccessful"
+   print result.status
+
+
 
 print "Result=", result.x
 print "Length coefficient=", (result.x)[0]
