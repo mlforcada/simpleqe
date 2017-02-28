@@ -85,13 +85,19 @@ directory="/home/mlf/apertium-sources/apertium-en-es"
 # segment translations will be held in a cache
 cache={}
 
+# Store the hits for each n-gram size and each segment
 hits = [[0 for x in range(args.maxngram+1)] for y in range(len(training_data))] 
+
+# To count the training set coverage ratio
+attempts = [0 for x in range(args.maxngram+1)]
+successes = [0 for x in range(args.maxngram+1)]
 
 
 for m, (time, source, target) in enumerate(training_data) :
 #   source=train[1]
 #   target=train[2]
    if args.verbose :
+      print "=========== segment {0}".format(m)
       print source
       print target
    source_tok=word_tokenize(source)
@@ -116,6 +122,7 @@ for m, (time, source, target) in enumerate(training_data) :
    # I'll do the reverse cache later
 
 
+
       
    # Now run the thing
    hits[m][0]=len(source_tok) # Store length for zero-grams
@@ -125,13 +132,21 @@ for m, (time, source, target) in enumerate(training_data) :
      hits[m][n]=0
      for i in range(len(source_tok)-n+1):
        seg=" ".join(source_tok[i:i+n])
-       res=cache[seg]
+       try :  # this should not be needed
+          res=cache[seg]
+       except KeyError:
+          res="Dummy Dummy Dummy"
+          if args.verbose :
+             print "==== KeyError exception handled when querying cache during the training phase"
+             print "Key=[[["+seg+"]]]"
        res_tok=word_tokenize(res.lower())
+       attempts[n] = attempts[n] + 1  # matching attempts for n-gram size n
        if len(res_tok) :
           found_tok=subfinder(target_tok,res_tok)
        if found_tok : 
        #   print "( ",seg," : ", res, ")"
-       #   print float(len(source_tok))/float((len(source_tok)-n+1)) 
+       #   print float(len(source_tok))/float((len(source_tok)-n+1))
+          successes[n] = successes[n] + 1  # successful attempts for n-gram size n
           hits[m][n] = hits[m][n] + float(len(source_tok))/float((len(source_tok)-n+1))
      if args.verbose :
         print "Ngram=", n, " Hits=", hits[m][n]
@@ -159,7 +174,7 @@ def mae(a) :
 a0=np.array([0 for y in range(args.maxngram+1)])
 
 # Optimize to an error of 0.0001 in MAE (will change later, can also use BFGS)
-result = minimize(mae, a0, method='nelder-mead', options={'fatol' : 1e-4, 'disp' : True, 'maxiter' : args.maxiter})
+result = minimize(mae, a0, method='nelder-mead', options={'fatol' : 1e-5, 'disp' : True, 'maxiter' : args.maxiter})
 
 if result.success :
    print "Optimization successful in {0} iterations".format(result.nit) 
@@ -173,6 +188,7 @@ print "Result=", result.x
 print "Length coefficient=", (result.x)[0]
 for n in range(1,args.maxngram+1):
    print n,"-gram coefficient=", (result.x)[n]
+   print n,"-gram success rate=", float(successes[n])/float(attempts[n])
 print "Training set MAE=", mae(result.x)
 
 
@@ -180,6 +196,11 @@ print "Training set MAE=", mae(result.x)
 # Now compute MAE over test set
 
 testhits = [0 for x in range(args.maxngram+1)]
+
+# To count the test set coverage ratio
+attempts = [0 for x in range(args.maxngram+1)]
+successes = [0 for x in range(args.maxngram+1)]
+
 
 MAE=0.0
 
@@ -218,13 +239,21 @@ for m, (time, source, target) in enumerate(test_data) :
      testhits[n]=0
      for i in range(len(source_tok)-n+1):
        seg=" ".join(source_tok[i:i+n])
-       res=cache[seg]
+       try : # This should not be necessary, but avoids some (strange) KeyErrors
+          res=cache[seg]
+       except KeyError : 
+          res="Dummy Dummy Dummy"
+          if args.verbose :
+             print "==== KeyError exception handled when querying cache during the test phase"
+             print "Key=[[["+seg+"]]]"
        res_tok=word_tokenize(res.lower())
+       attempts[n] = attempts[n] +1  # matching attempts for n-gram size n
        if len(res_tok) :
           found_tok=subfinder(target_tok,res_tok)
        if found_tok : 
        #   print "( ",seg," : ", res, ")"
        #   print float(len(source_tok))/float((len(source_tok)-n+1)) 
+          successes[n] = successes[n] + 1  # successful attempts for n-gram size n
           testhits[n] = testhits[n] + float(len(source_tok))/float((len(source_tok)-n+1))
      if args.verbose :
         print "Ngram=", n, " Hits=", testhits[n]
@@ -238,7 +267,10 @@ for m, (time, source, target) in enumerate(test_data) :
    MAE=MAE+math.fabs(float(time)-prediction)/len(test_data)
 # End for train
 
+
 print "Test set MAE=", MAE
+for n in range(1,args.maxngram+1):
+   print "Test set", n,"-gram success rate=", float(successes[n])/float(attempts[n])
 
 
 
