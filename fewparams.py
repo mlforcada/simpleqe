@@ -38,6 +38,7 @@ parser.add_argument("test_raw_mt",help="test raw MT sentence file")
 parser.add_argument("test_slm",help="test source language model")
 parser.add_argument("test_tlm",help="test target language model")
 
+parser.add_argument("--repeats", help="Number of random repeats", dest="repeats", type=int, default=10)
 parser.add_argument("--select_features", help="Numbers of features to be selected", nargs="+", dest="features")
 
 
@@ -71,15 +72,16 @@ test_nexamples=len(zip(test_featureset,training_time))
 # total 6 features
 ntotalfeatures=6
 
+featurenames=["Source char=", "Source word=", "MT char=", "MT word=", "SLM=", "TLM="]
+
+
 # selected features:
 selected=args.features
+if args.features==[] :
+   selected=range(0,ntotalfeatures)
 nfeatures=len(selected)
 
 
-# Initialize parameter vector
-
-# a0=np.array([0 for y in range(nfeatures)])
-a0=np.array([np.random.randn() for y in range(nfeatures)])
 def mae(a) :
    MAE=0
    for m in range(nexamples) :
@@ -94,30 +96,48 @@ featureset=training_featureset
 time=training_time
 nexamples=training_nexamples
 
-# Optimize to an error of 0.0001 in MAE (will change later, can also use BFGS)
-result = minimize(mae, a0, method='nelder-mead', options={'fatol' : 1e-6, 'disp' : True, 'maxiter' : args.maxiter})
+# Run a number of random starts and keep the data for the best training-set MAE
 
-if result.success :
-   print "Optimization successful in {0} iterations".format(result.nit) 
-else : 
-   print "Optimization unsuccessful"
-   print result.status
+best_train_set_MAE=float("inf")
 
-print "Result=", result.x
-print "Coefficients"
+for i in range(args.repeats):
 
-featurenames=["Source char=", "Source word=", "MT char=", "MT word=", "SLM=", "TLM="]
-for j,f in enumerate(selected):
-   print featurenames[int(f)], (result.x)[j]
+  # Random initialization
+  a0=np.array([np.random.randn() for y in range(nfeatures)])
+  # a0=np.array([0 for y in range(nfeatures)])
 
-print "Training set MAE=", mae(result.x)
 
-print "Results on testset"
+  # Optimize to an error of 0.0001 in MAE (will change later, can also use    BFGS)
+  result = minimize(mae, a0, method='nelder-mead', options={'fatol' : 1e-6, 'disp' : True, 'maxiter' : args.maxiter})
 
+  if result.success :
+    print "Optimization successful in {0} iterations".format(result.nit) 
+  else : 
+    print "Optimization unsuccessful"
+    print result.status
+
+  print "Result=", result.x
+  print "Coefficients"
+
+  for j,f in enumerate(selected):
+     print featurenames[int(f)], (result.x)[j]
+
+  current_MAE=mae(result.x)
+  print "Training set MAE=", current_MAE
+  if current_MAE<best_train_set_MAE :
+     best_train_set_MAE = current_MAE
+     best_a=result.x
+     print "Best training set MAE so far=", best_train_set_MAE
+
+# end for
 # Test set data
 featureset=test_featureset
 time=test_time
 nexamples=test_nexamples
 
-print "Test set MAE=", mae(result.x)
+print "====="
+print "Results on testset"
+print "Test set MAE=", mae(best_a)
+print "Obtained for a training set MAE of", best_train_set_MAE
+
 
