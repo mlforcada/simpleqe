@@ -38,6 +38,8 @@ parser.add_argument("test_raw_mt",help="test raw MT sentence file")
 parser.add_argument("test_slm",help="test source language model")
 parser.add_argument("test_tlm",help="test target language model")
 
+parser.add_argument("--select_features", help="Numbers of features to be selected", nargs="+", dest="features")
+
 
 # Verbose
 parser.add_argument("--verbose", action="store_true", dest="verbose", default=False, help="Print each calculation")
@@ -60,14 +62,19 @@ test_tlm=readdata(args.test_tlm)
 
 
 training_featureset = [  [ len(q[0]),len(word_tokenize(q[0])),len(q[1]),len(word_tokenize(q[1])), float(q[2]), float(q[3])  ] for q in zip(training_source,training_raw_mt,training_slm,training_tlm) ]
-test_featureset = [  [ len(q[0]),len(word_tokenize(q[0])),len(q[1]),len(word_tokenize(q[1])), float(q[2]), float(q[3])  ] for q in zip(test_source,test_raw_mt,test_slm,training_tlm) ]
+test_featureset = [  [ len(q[0]),len(word_tokenize(q[0])),len(q[1]),len(word_tokenize(q[1])), float(q[2]), float(q[3])  ] for q in zip(test_source,test_raw_mt,test_slm,test_tlm) ]
 
 
 training_nexamples=len(zip(training_featureset,training_time))
 test_nexamples=len(zip(test_featureset,training_time))
 
 # total 6 features
-nfeatures=6
+ntotalfeatures=6
+
+# selected features:
+selected=args.features
+nfeatures=len(selected)
+
 
 # Initialize parameter vector
 
@@ -78,7 +85,7 @@ def mae(a) :
    for m in range(nexamples) :
       dev=float(time[m])
       for f in range(nfeatures) :
-         dev=dev-a[f]*featureset[m][f]
+         dev=dev-a[f]*featureset[m][int(selected[f])]
       MAE=MAE+math.fabs(dev)
    return MAE/nexamples
 
@@ -98,12 +105,11 @@ else :
 
 print "Result=", result.x
 print "Coefficients"
-print "Source char=", (result.x)[0]
-print "Source word=", (result.x)[1]
-print "MT char=", (result.x)[2]
-print "MT word=", (result.x)[3]
-print "SLM=", (result.x)[4]
-print "TLM=", (result.x)[5]
+
+featurenames=["Source char=", "Source word=", "MT char=", "MT word=", "SLM=", "TLM="]
+for j,f in enumerate(selected):
+   print featurenames[int(f)], (result.x)[j]
+
 print "Training set MAE=", mae(result.x)
 
 print "Results on testset"
