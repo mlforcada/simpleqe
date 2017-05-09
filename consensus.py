@@ -1,6 +1,6 @@
 # Trying to prepare "consensus discount" features
 # Using Apertium
-# MLF 20170203
+# MLF 20170505
 
 # import sys
 import subprocess
@@ -62,6 +62,14 @@ parser.add_argument('-v', '--verbose', help='Verbose Mode', dest="verbose", acti
 # Optimization
 parser.add_argument('--maxiter', help="Maximum number of iterations (default 200)", type=int, default=200)
 
+# Repeats
+parser.add_argument('--repeats', help="Number of repeats", type=int, default=10)
+
+# Counts
+# By default, multiple hits are taken as a Boolean value
+# This option actually counts the hits
+parser.add_argument('--counts', help="Count hits instead of Boolean", action="store_true", default=False)
+
 
 # Parse them
 args=parser.parse_args()
@@ -112,7 +120,6 @@ for m, (time, source, target) in enumerate(training_data) :
        seg=" ".join(source_tok[i:i+n])
        sourcesegs= sourcesegs + seg + "\n\n"
 
-
    targetsegs=translateText(sourcesegs,languagepair,directory).lower()
 
    # Store n-gram translations in a cache
@@ -146,8 +153,12 @@ for m, (time, source, target) in enumerate(training_data) :
        if found_tok : 
        #   print "( ",seg," : ", res, ")"
        #   print float(len(source_tok))/float((len(source_tok)-n+1))
-          successes[n] = successes[n] + 1  # successful attempts for n-gram size n
-          hits[m][n] = hits[m][n] + float(len(source_tok))/float((len(source_tok)-n+1))
+          if args.counts :
+             successes[n] = successes[n] + len(found_tok)
+             hits[m][n] = hits[m][n] + float(len(source_tok))/float((len(source_tok)-n+1)) * len(found_tok)
+          else : 
+             successes[n] = successes[n] + 1
+             hits[m][n] = hits[m][n] + float(len(source_tok))/float((len(source_tok)-n+1))
      if args.verbose :
         print "Ngram=", n, " Hits=", hits[m][n]
 	
@@ -168,30 +179,37 @@ def mae(a) :
       MAE=MAE+math.fabs(dev)
    return MAE/len(training_data)
  
+best_train_set_MAE=float("inf")
+for i in range(args.repeats) :
 
-# Initial values --- starting with zeros for lack of a better estimate
+  # Initial values --- starting with a value sampled from N(0,1)
+  a0=np.array([np.random.randn() for y in range(args.maxngram+1)])
 
-a0=np.array([0 for y in range(args.maxngram+1)])
+  # Optimize to an error of 0.00001 in MAE (will change later, can also use    BFGS)
+  result = minimize(mae, a0, method='nelder-mead', options={'fatol' : 1e-6, 'disp' : True, 'maxiter' : args.maxiter})
 
-# Optimize to an error of 0.0001 in MAE (will change later, can also use BFGS)
-result = minimize(mae, a0, method='nelder-mead', options={'fatol' : 1e-5, 'disp' : True, 'maxiter' : args.maxiter})
-
-if result.success :
-   print "Optimization successful in {0} iterations".format(result.nit) 
-else : 
-   print "Optimization unsuccessful"
-   print result.status
-
+  if result.success :
+     print "Optimization successful in {0} iterations".format(result.nit) 
+  else : 
+     print "Optimization unsuccessful"
+     print result.status
 
 
-print "Result=", result.x
-print "Length coefficient=", (result.x)[0]
-for n in range(1,args.maxngram+1):
+
+  print "Result=", result.x
+  print "Length coefficient=", (result.x)[0]
+  for n in range(1,args.maxngram+1):
    print n,"-gram coefficient=", (result.x)[n]
    print n,"-gram success rate=", float(successes[n])/float(attempts[n])
-print "Training set MAE=", mae(result.x)
+   
+  current_MAE=mae(result.x)
+  print "Training set MAE=", current_MAE
+  if current_MAE<best_train_set_MAE :
+     best_train_set_MAE = current_MAE
+     best_a=result.x
+     print "Best training set MAE so far=", best_train_set_MAE
 
-
+# End for
 
 # Now compute MAE over test set
 
@@ -252,16 +270,20 @@ for m, (time, source, target) in enumerate(test_data) :
           found_tok=subfinder(target_tok,res_tok)
        if found_tok : 
        #   print "( ",seg," : ", res, ")"
-       #   print float(len(source_tok))/float((len(source_tok)-n+1)) 
-          successes[n] = successes[n] + 1  # successful attempts for n-gram size n
-          testhits[n] = testhits[n] + float(len(source_tok))/float((len(source_tok)-n+1))
+       #   print float(len(source_tok))/float((len(source_tok)-n+1))
+          if args.counts : 
+             successes[n] = successes[n] + len(found_tok)  # successful attempts for n-gram size n
+             testhits[n] = testhits[n] + float(len(source_tok))/float((len(source_tok)-n+1)) * len(found_tok)
+          else :
+             successes[n] = successes[n] + 1  # successful attempts for n-gram size n
+             testhits[n] = testhits[n] + float(len(source_tok))/float((len(source_tok)-n+1))
      if args.verbose :
         print "Ngram=", n, " Hits=", testhits[n]
 
-# Compute contribution to MAE
+# Compute contribution to MAE using best_a
    prediction=0
    for n in range(0,args.maxngram+1) :
-      prediction=prediction+float((result.x)[n])*testhits[n]
+      prediction=prediction+best_a[n]*testhits[n]
    if args.verbose :
       print "Prediction={0} Time={1}".format(prediction, time)
    MAE=MAE+math.fabs(float(time)-prediction)/len(test_data)
