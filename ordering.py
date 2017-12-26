@@ -57,6 +57,8 @@ for i in range(len(sente)) :
 	totlenw=totlenw+len(word_tokenize(sente[i]))
 	totlenc=totlenc+len(sente[i])
 	
+Print "Total lengths: ", totlenw, " words, ", totlenc, " characters".
+	
 # time per unit length (word w, char c).
 taumeasw=[]
 tauestiw=[]	
