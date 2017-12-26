@@ -57,7 +57,7 @@ for i in range(len(sente)) :
 	totlenw=totlenw+len(word_tokenize(sente[i]))
 	totlenc=totlenc+len(sente[i])
 	
-Print "Total lengths: ", totlenw, " words, ", totlenc, " characters".
+print "Total lengths: ", totlenw, " words, ", totlenc, " characters"
 	
 # time per unit length (word w, char c).
 taumeasw=[]
@@ -65,15 +65,16 @@ tauestiw=[]
 taumeasc=[]
 tauestic=[]	
 tottmeas=0
-tottesti=0
 for i in range(len(tmeas)) :
 	taumeasw.append(float(tmeas[i])/slenw[i])
 	taumeasc.append(float(tmeas[i])/slenc[i])
 	tauestiw.append(float(testi[i])/slenw[i])
 	tauestic.append(float(testi[i])/slenc[i])
-	tottesti=tottesti+float(testi[i])
 	tottmeas=tottmeas+float(tmeas[i])
 
+print "Total measured time: ", tottmeas, " seconds"
+print "----"
+print 
 # For use by argsort()
 ntaumeasw = numpy.array(taumeasw)
 ntaumeasc = numpy.array(taumeasc)
@@ -85,6 +86,10 @@ itaumeasw = ntaumeasw.argsort()
 itaumeasc = ntaumeasc.argsort()
 itauestiw = ntauestiw.argsort()
 itauestic = ntauestic.argsort()
+
+# Delete this stanza
+#for i in range(len(aux)) :
+#   print itaumeasw[i], taumeasw[itaumeasw[i]], ntaumeasw[itaumeasw[i]]
 	
 # Measured times
 # Minimize time for at least a certain length
@@ -93,9 +98,9 @@ itauestic = ntauestic.argsort()
 print "Best time for a given length in words"
 l = 0
 t = 0
-for i in itaumeasw :
-	l=l+len(sente[itaumeasw[i]])
-	t=t+float(tmeas[itaumeasw[i]]) 
+for i in range(len(aux)) :
+	l=l+len(word_tokenize(sente[itaumeasw[i]]))
+	t=t+float(tmeas[itaumeasw[i]])
 	if l>args.fraction*totlenw : # if a certain length is reached, break
 		break
 print "Total length= ", l, " words"
@@ -105,22 +110,22 @@ print "Measured time= ", t, " seconds"
 print "Best time for a given length in characters"
 l = 0
 t = 0
-for i in itaumeasc :
+for i in range(len(aux)) :
 	l=l+len(sente[itaumeasc[i]])
 	t=t+float(tmeas[itaumeasc[i]]) 
-	if l>args.fraction*totlenc : # if a certain length is reached, berak
+	if l>args.fraction*totlenc : # if a certain length is reached, break
 		break
-print "Total length= ", l, " words" 
+print "Total length= ", l, " characters" 
 print "Best measured time= ", t, " seconds"
 
 # Minimize time for at least a certain length
 print "Best length in words for less than a total time"
 l = 0
 t = 0
-for i in itaumeasw :
+for i in range(len(aux)) :
 	if t>args.fraction*tottmeas : # never arrive to the limit time
 		break
-	l=l+len(sente[itaumeasw[i]])
+	l=l+len(word_tokenize(sente[itaumeasw[i]]))
 	t=t+float(tmeas[itaumeasw[i]]) 
 print "Total time= ", t, " seconds"
 print "Best length=", l, " words"
@@ -130,7 +135,7 @@ print "Best length=", l, " words"
 print "Best length in characters for less than a total time"
 l = 0
 t = 0
-for i in itaumeasc :
+for i in range(len(aux)) :
 	if t>args.fraction*tottmeas : # never arrive to the limit time
 		break
 	l=l+len(sente[itaumeasc[i]])
@@ -148,8 +153,8 @@ print ""
 print "Best estimated time for a given length in words"
 l = 0
 t = 0
-for i in itauestiw :
-	l=l+len(sente[itauestiw[i]])
+for i in range(len(aux)) :
+	l=l+len(word_tokenize(sente[itauestiw[i]]))
 	t=t+float(tmeas[itauestiw[i]])
 	if l>args.fraction*totlenw : # if a certain length is reached, break
 		break
@@ -160,22 +165,22 @@ print "Measured time= ", t, " seconds"
 print "Best estimated time for a given length in characters"
 l = 0
 t = 0
-for i in itauestic :
+for i in range(len(aux)) :
 	l=l+len(sente[itauestic[i]])
 	t=t+float(tmeas[itauestic[i]]) 
-	if l>args.fraction*totlenc : # if a certain length is reached, berak
+	if l>args.fraction*totlenc : # if a certain length is reached, break
 		break
-print "Total length= ", l, " words" 
+print "Total length= ", l, " characters" 
 print "Best measured time= ", t, " seconds"
 
 # Minimize time for at least a certain length
 print "Best estimated length in words for less than a total time"
 l = 0
 t = 0
-for i in itauestiw :
+for i in range(len(aux)) :
 	if t>args.fraction*tottmeas : # never arrive to the limit time
 		break
-	l=l+len(sente[itauestiw[i]])
+	l=l+len(word_tokenize(sente[itauestiw[i]]))
 	t=t+float(tmeas[itauestiw[i]])
 print "Total time= ", t, " seconds"
 print "Best length=", l, " words"
@@ -185,7 +190,7 @@ print "Best length=", l, " words"
 print "Best length in characters for less than a total time"
 l = 0
 t = 0
-for i in itaumeasc :
+for i in range(len(aux)) :
 	if t>args.fraction*tottmeas : # never arrive to the limit time
 		break
 	l=l+len(sente[itauestic[i]])
