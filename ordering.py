@@ -105,6 +105,7 @@ for i in range(len(aux)) :
 		break
 print "Total length= ", l, " words"
 print "Measured time= ", t, " seconds"
+tmeasw=t
 
 # Characters
 print "Best time for a given length in characters"
@@ -117,6 +118,7 @@ for i in range(len(aux)) :
 		break
 print "Total length= ", l, " characters" 
 print "Best measured time= ", t, " seconds"
+tmeasc=t
 
 # Minimize time for at least a certain length
 print "Best length in words for less than a total time"
@@ -129,7 +131,7 @@ for i in range(len(aux)) :
 	t=t+float(tmeas[itaumeasw[i]]) 
 print "Total time= ", t, " seconds"
 print "Best length=", l, " words"
-
+lmeasw=l
 	
 # Minimize time for at least a certain length
 print "Best length in characters for less than a total time"
@@ -142,7 +144,7 @@ for i in range(len(aux)) :
 	t=t+float(tmeas[itaumeasc[i]]) 
 print "Total time= ", t, " seconds"
 print "Best length=", l, " characters"
-
+lmeasc=l
 
 print "--------------------------------------------------------"
 print "Estimated times"
@@ -160,6 +162,7 @@ for i in range(len(aux)) :
 		break
 print "Total length= ", l, " words"
 print "Measured time= ", t, " seconds"
+testiw=t
 
 # Characters
 print "Best estimated time for a given length in characters"
@@ -172,6 +175,7 @@ for i in range(len(aux)) :
 		break
 print "Total length= ", l, " characters" 
 print "Best measured time= ", t, " seconds"
+testic=t
 
 # Minimize time for at least a certain length
 print "Best estimated length in words for less than a total time"
@@ -184,7 +188,7 @@ for i in range(len(aux)) :
 	t=t+float(tmeas[itauestiw[i]])
 print "Total time= ", t, " seconds"
 print "Best length=", l, " words"
-
+lestiw=l
 	
 # Minimize time for at least a certain length
 print "Best length in characters for less than a total time"
@@ -197,7 +201,17 @@ for i in range(len(aux)) :
 	t=t+float(tmeas[itauestic[i]]) 
 print "Total time= ", t, " seconds"
 print "Best length=", l, " characters"
+lestic=l
 
+# Print splits
+
+print ""
+print "Current fraction=", args.fraction
+print "Splits"
+print "Best time, words; meas=", tmeasw/tottmeas , " esti=", testiw/tottmeas
+print "Best time, chars; meas=", tmeasc/tottmeas , " esti=", testic/tottmeas
+print "Best use of time, words; meas=", float(lmeasw)/totlenw, " esti=", float(lestiw)/totlenw
+print "Best use of time, chars; meas=", float(lmeasc)/totlenc, " esti=", float(lestic)/totlenc
 
 
 
