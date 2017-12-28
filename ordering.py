@@ -1,4 +1,4 @@
-# MLF 20171226
+# MLF 20171228
 # Read:
 # one sentence per line
 # post-editing time (one value per line)
@@ -32,9 +32,11 @@ def readdata(filename):
     
 parser = argparse.ArgumentParser()
 parser.add_argument("measured_time",help="Measured PE time")
-parser.add_argument("estimated_time",help="Estimated PE time")
+parser.add_argument("estimated_time",help="Estimated indicator")
 parser.add_argument("sentences", help="Sentences")
 parser.add_argument("fraction", type=float, help="Fraction")
+parser.add_argument("--intensive", action="store_true", dest="intensive", default=False, help="Estimated indicator is intensive")
+
 args=parser.parse_args()
 
 tmeas = readdata(args.measured_time)
@@ -68,8 +70,12 @@ tottmeas=0
 for i in range(len(tmeas)) :
 	taumeasw.append(float(tmeas[i])/slenw[i])
 	taumeasc.append(float(tmeas[i])/slenc[i])
-	tauestiw.append(float(testi[i])/slenw[i])
-	tauestic.append(float(testi[i])/slenc[i])
+	if args.intensive==False :
+	   tauestiw.append(float(testi[i])/slenw[i])
+	   tauestic.append(float(testi[i])/slenc[i])
+	else :
+		tauestiw.append(float(testi[i]))   # the same for the time being
+		tauestic.append(float(testi[i]))
 	tottmeas=tottmeas+float(tmeas[i])
 
 print "Total measured time: ", tottmeas, " seconds"
