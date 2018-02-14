@@ -204,7 +204,7 @@ print "Q_simple(r,words)=",Qsimplew_r
 print "Q_simple(opt,char)=",Qsimplec_opt
 print "Q_simple(opt,words)=",Qsimplew_opt
 print ""
-print "Normalized mesaures"
+print "Normalized measures"
 print "___________________"
 print "Q_seg(r,char)=",Qsegc_r
 print "Q_seg(r,words)=",Qsegw_r
