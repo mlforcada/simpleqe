@@ -121,8 +121,8 @@ qjw_r   = [0]*len(tmeas)
 qjw_opt = [0]*len(tmeas)
  
 
-for j in range(1,ntest):
-   print j
+for j in range(1,ntest): # j varies from 1 to ntest-1, as in formulas
+   print "j=",j
    # upper part
    upsumtc_opt=0
    upsumtw_opt=0
@@ -132,7 +132,8 @@ for j in range(1,ntest):
    upsumtw_r=0
    upsumlc_r=0
    upsumlw_r=0
-   for k in range(1,j+1):
+   for k in range(0,j): # k varies from 0 (1 in formulas) to j-1 (j in formulas)
+       print "k(up)=",k
        upsumtw_opt=upsumtw_opt+float(tmeas[itaumeasw[k]])
        upsumtc_opt=upsumtc_opt+float(tmeas[itaumeasc[k]])
        upsumlc_opt=upsumlc_opt+len(sente[itaumeasc[k]])
@@ -154,7 +155,8 @@ for j in range(1,ntest):
    losumtw_r  =0
    losumlc_r  =0
    losumlw_r  =0
-   for k in range(j+1,ntest):
+   for k in range(j,ntest-1): # k varies from j (j+1 in formulas) to ntest-2 (ntest-1 in formulas)
+       print "k(lo)=",k
        losumtw_opt=losumtw_opt+float(tmeas[itaumeasw[k]])
        losumtc_opt=losumtc_opt+float(tmeas[itaumeasc[k]])
        losumlc_opt=losumlc_opt+len(sente[itaumeasc[k]])
