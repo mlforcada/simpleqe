@@ -132,16 +132,16 @@ for j in range(1,ntest): # j varies from 1 to ntest-1, as in formulas
    upsumtw_r=0
    upsumlc_r=0
    upsumlw_r=0
-   for k in range(0,j): # k varies from 0 (1 in formulas) to j-1 (j in formulas)
+   for k in range(1,j+1): # k varies from 1 to j ; indexing has to be decremented
        print "k(up)=",k
-       upsumtw_opt=upsumtw_opt+float(tmeas[itaumeasw[k]])
-       upsumtc_opt=upsumtc_opt+float(tmeas[itaumeasc[k]])
-       upsumlc_opt=upsumlc_opt+len(sente[itaumeasc[k]])
-       upsumlw_opt=upsumlw_opt+len(word_tokenize(sente[itaumeasw[k]]))
-       upsumtw_r  =upsumtw_r  +float(tmeas[itauestiw[k]])
-       upsumtc_r  =upsumtc_r  +float(tmeas[itauestic[k]])
-       upsumlc_r  =upsumlc_r  +len(sente[itauestic[k]])
-       upsumlw_r  =upsumlw_r  +len(word_tokenize(sente[itauestiw[k]]))
+       upsumtw_opt=upsumtw_opt+float(tmeas[itaumeasw[k-1]])
+       upsumtc_opt=upsumtc_opt+float(tmeas[itaumeasc[k-1]])
+       upsumlc_opt=upsumlc_opt+len(sente[itaumeasc[k-1]])
+       upsumlw_opt=upsumlw_opt+len(word_tokenize(sente[itaumeasw[k-1]]))
+       upsumtw_r  =upsumtw_r  +float(tmeas[itauestiw[k-1]])
+       upsumtc_r  =upsumtc_r  +float(tmeas[itauestic[k-1]])
+       upsumlc_r  =upsumlc_r  +len(sente[itauestic[k-1]])
+       upsumlw_r  =upsumlw_r  +len(word_tokenize(sente[itauestiw[k-1]]))
    uptw_r  =upsumtw_r  /upsumlw_r  
    uptc_r  =upsumtc_r  /upsumlc_r
    uptw_opt=upsumtw_opt/upsumlw_opt  
@@ -155,16 +155,16 @@ for j in range(1,ntest): # j varies from 1 to ntest-1, as in formulas
    losumtw_r  =0
    losumlc_r  =0
    losumlw_r  =0
-   for k in range(j,ntest-1): # k varies from j (j+1 in formulas) to ntest-2 (ntest-1 in formulas)
+   for k in range(j,ntest): # k varies from j+1 to ntest-1; indexing has to be decremented
        print "k(lo)=",k
-       losumtw_opt=losumtw_opt+float(tmeas[itaumeasw[k]])
-       losumtc_opt=losumtc_opt+float(tmeas[itaumeasc[k]])
-       losumlc_opt=losumlc_opt+len(sente[itaumeasc[k]])
-       losumlw_opt=losumlw_opt+len(word_tokenize(sente[itaumeasw[k]]))
-       losumtw_r  =losumtw_r  +float(tmeas[itauestiw[k]])
-       losumtc_r  =losumtc_r  +float(tmeas[itauestic[k]])
-       losumlc_r  =losumlc_r  +len(sente[itauestic[k]])
-       losumlw_r  =losumlw_r  +len(word_tokenize(sente[itauestiw[k]]))
+       losumtw_opt=losumtw_opt+float(tmeas[itaumeasw[k-1]])
+       losumtc_opt=losumtc_opt+float(tmeas[itaumeasc[k-1]])
+       losumlc_opt=losumlc_opt+len(sente[itaumeasc[k-1]])
+       losumlw_opt=losumlw_opt+len(word_tokenize(sente[itaumeasw[k-1]]))
+       losumtw_r  =losumtw_r  +float(tmeas[itauestiw[k-1]])
+       losumtc_r  =losumtc_r  +float(tmeas[itauestic[k-1]])
+       losumlc_r  =losumlc_r  +len(sente[itauestic[k-1]])
+       losumlw_r  =losumlw_r  +len(word_tokenize(sente[itauestiw[k-1]]))
    lotw_r  =losumtw_r  /losumlw_r  
    lotc_r  =losumtc_r  /losumlc_r
    lotw_opt=losumtw_opt/losumlw_opt  
