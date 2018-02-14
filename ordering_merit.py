@@ -102,12 +102,6 @@ itaumeasc = ntaumeasc.argsort()
 itauestiw = ntauestiw.argsort()
 itauestic = ntauestic.argsort()
 
-# Delete this stanza
-#for i in range(len(aux)) :
-#   print itaumeasw[i], taumeasw[itaumeasw[i]], ntaumeasw[itaumeasw[i]]
-	
-# Measured times
-# Minimize time for at least a certain length
 
 # Compute q_j(r) and q_j(opt)
 # for characters and words
@@ -136,12 +130,12 @@ for j in range(1,ntest): # j varies from 1 to ntest-1, as in formulas
        # print "k(up)=",k
        upsumtw_opt=upsumtw_opt+            float(tmeas[itaumeasw[k-1]])
        upsumtc_opt=upsumtc_opt+            float(tmeas[itaumeasc[k-1]])
-       upsumlw_opt=upsumlw_opt+len(word_tokenize(sente[itaumeasw[k-1]]))
-       upsumlc_opt=upsumlc_opt+len(              sente[itaumeasc[k-1]] )
+       upsumlw_opt=upsumlw_opt+                  slenw[itaumeasw[k-1]]
+       upsumlc_opt=upsumlc_opt+                  slenc[itaumeasc[k-1]] 
        upsumtw_r  =upsumtw_r  +            float(tmeas[itauestiw[k-1]])
        upsumtc_r  =upsumtc_r  +            float(tmeas[itauestic[k-1]])
-       upsumlw_r  =upsumlw_r  +len(word_tokenize(sente[itauestiw[k-1]]))
-       upsumlc_r  =upsumlc_r  +len(              sente[itauestic[k-1]] )
+       upsumlw_r  =upsumlw_r  +                  slenw[itauestiw[k-1]]
+       upsumlc_r  =upsumlc_r  +                  slenc[itauestic[k-1]] 
    uptw_r  =upsumtw_r  /upsumlw_r  
    uptc_r  =upsumtc_r  /upsumlc_r
    uptw_opt=upsumtw_opt/upsumlw_opt  
@@ -159,12 +153,12 @@ for j in range(1,ntest): # j varies from 1 to ntest-1, as in formulas
        # print "k(lo)=",k
        losumtw_opt=losumtw_opt+            float(tmeas[itaumeasw[k-1]])
        losumtc_opt=losumtc_opt+            float(tmeas[itaumeasc[k-1]])
-       losumlw_opt=losumlw_opt+len(word_tokenize(sente[itaumeasw[k-1]]))
-       losumlc_opt=losumlc_opt+len(              sente[itaumeasc[k-1]] )
+       losumlw_opt=losumlw_opt+                  slenw[itaumeasw[k-1]]
+       losumlc_opt=losumlc_opt+                  slenc[itaumeasc[k-1]] 
        losumtw_r  =losumtw_r  +            float(tmeas[itauestiw[k-1]])
        losumtc_r  =losumtc_r  +            float(tmeas[itauestic[k-1]])
-       losumlw_r  =losumlw_r  +len(word_tokenize(sente[itauestiw[k-1]]))
-       losumlc_r  =losumlc_r  +len(              sente[itauestic[k-1]])
+       losumlw_r  =losumlw_r  +                  slenw[itauestiw[k-1]]
+       losumlc_r  =losumlc_r  +                  slenc[itauestic[k-1]]
    lotw_r  =losumtw_r  /losumlw_r  
    lotc_r  =losumtc_r  /losumlc_r
    lotw_opt=losumtw_opt/losumlw_opt  
