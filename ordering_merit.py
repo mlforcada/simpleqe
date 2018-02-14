@@ -184,10 +184,6 @@ Qsimplew_r  =0
 Qsimplew_opt=0
 Qsegw_r  =0
 Qsegc_r  =0
-numQdocw_r  =0
-denQdocw_r  =0
-numQdocc_r  =0
-denQdocc_r  =0
 for j in range(1,ntest):
 	Qsimplec_r  =Qsimplec_r   + qjc_r  [j]/(ntest-1)
 	Qsimplew_r  =Qsimplew_r   + qjw_r  [j]/(ntest-1)
@@ -197,13 +193,7 @@ for j in range(1,ntest):
 	Qsegw_r = Qsegw_r + ((qjw_r  [j]-1.0)/(qjw_opt[j]-1.0))/(ntest-1)
 	Qsegc_r = Qsegc_r + ((qjc_r  [j]-1.0)/(qjc_opt[j]-1.0))/(ntest-1)
 	
-	numQdocc_r = numQdocc_r + (qjc_r  [j]-1.0)
-	denQdocc_r = denQdocc_r + (qjc_opt[j]-1.0)
-	numQdocw_r = numQdocw_r + (qjw_r  [j]-1.0)
-	denQdocw_r = denQdocw_r + (qjw_opt[j]-1.0)
     
-Qdocc_r=numQdocc_r/denQdocc_r
-Qdocw_r=numQdocw_r/denQdocw_r
 
 print "Alignment merit figures"
 print ""
@@ -218,9 +208,7 @@ print "Normalized mesaures"
 print "___________________"
 print "Q_seg(r,char)=",Qsegc_r
 print "Q_seg(r,words)=",Qsegw_r
-print ""
-print "Q_doc(r,char)=",Qdocc_r
-print "Q_doc(r,words)=",Qdocw_r
-print ""
+print "Q_doc(r,char)=",(Qsimplec_r-1.0)/(Qsimplec_opt-1.0)
+print "Q_doc(r,words)=",(Qsimplew_r-1.0)/(Qsimplew_opt-1.0)
 
 exit
