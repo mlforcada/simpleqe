@@ -52,7 +52,7 @@ tmeas = readdata(args.measured_time)
 sente = readdata(args.sentences)
 aux = readdata(args.estimated_time)
 
-print len(aux)
+print "Number of segments=", len(aux)
 testi = [-float("inf")]*len(aux) # matrix
 for i in range(len(aux)) :
 	_z = aux[i].split()
@@ -122,7 +122,7 @@ qjw_opt = [0]*len(tmeas)
  
 
 for j in range(1,ntest): # j varies from 1 to ntest-1, as in formulas
-   print "j=",j
+   # print "j=",j
    # upper part
    upsumtc_opt=0
    upsumtw_opt=0
@@ -133,15 +133,15 @@ for j in range(1,ntest): # j varies from 1 to ntest-1, as in formulas
    upsumlc_r=0
    upsumlw_r=0
    for k in range(1,j+1): # k varies from 1 to j ; indexing has to be decremented
-       print "k(up)=",k
-       upsumtw_opt=upsumtw_opt+float(tmeas[itaumeasw[k-1]])
-       upsumtc_opt=upsumtc_opt+float(tmeas[itaumeasc[k-1]])
-       upsumlc_opt=upsumlc_opt+len(sente[itaumeasc[k-1]])
+       # print "k(up)=",k
+       upsumtw_opt=upsumtw_opt+            float(tmeas[itaumeasw[k-1]])
+       upsumtc_opt=upsumtc_opt+            float(tmeas[itaumeasc[k-1]])
        upsumlw_opt=upsumlw_opt+len(word_tokenize(sente[itaumeasw[k-1]]))
-       upsumtw_r  =upsumtw_r  +float(tmeas[itauestiw[k-1]])
-       upsumtc_r  =upsumtc_r  +float(tmeas[itauestic[k-1]])
-       upsumlc_r  =upsumlc_r  +len(sente[itauestic[k-1]])
+       upsumlc_opt=upsumlc_opt+len(              sente[itaumeasc[k-1]] )
+       upsumtw_r  =upsumtw_r  +            float(tmeas[itauestiw[k-1]])
+       upsumtc_r  =upsumtc_r  +            float(tmeas[itauestic[k-1]])
        upsumlw_r  =upsumlw_r  +len(word_tokenize(sente[itauestiw[k-1]]))
+       upsumlc_r  =upsumlc_r  +len(              sente[itauestic[k-1]] )
    uptw_r  =upsumtw_r  /upsumlw_r  
    uptc_r  =upsumtc_r  /upsumlc_r
    uptw_opt=upsumtw_opt/upsumlw_opt  
@@ -156,15 +156,15 @@ for j in range(1,ntest): # j varies from 1 to ntest-1, as in formulas
    losumlc_r  =0
    losumlw_r  =0
    for k in range(j,ntest): # k varies from j+1 to ntest-1; indexing has to be decremented
-       print "k(lo)=",k
-       losumtw_opt=losumtw_opt+float(tmeas[itaumeasw[k-1]])
-       losumtc_opt=losumtc_opt+float(tmeas[itaumeasc[k-1]])
-       losumlc_opt=losumlc_opt+len(sente[itaumeasc[k-1]])
+       # print "k(lo)=",k
+       losumtw_opt=losumtw_opt+            float(tmeas[itaumeasw[k-1]])
+       losumtc_opt=losumtc_opt+            float(tmeas[itaumeasc[k-1]])
        losumlw_opt=losumlw_opt+len(word_tokenize(sente[itaumeasw[k-1]]))
-       losumtw_r  =losumtw_r  +float(tmeas[itauestiw[k-1]])
-       losumtc_r  =losumtc_r  +float(tmeas[itauestic[k-1]])
-       losumlc_r  =losumlc_r  +len(sente[itauestic[k-1]])
+       losumlc_opt=losumlc_opt+len(              sente[itaumeasc[k-1]] )
+       losumtw_r  =losumtw_r  +            float(tmeas[itauestiw[k-1]])
+       losumtc_r  =losumtc_r  +            float(tmeas[itauestic[k-1]])
        losumlw_r  =losumlw_r  +len(word_tokenize(sente[itauestiw[k-1]]))
+       losumlc_r  =losumlc_r  +len(              sente[itauestic[k-1]])
    lotw_r  =losumtw_r  /losumlw_r  
    lotc_r  =losumtc_r  /losumlc_r
    lotw_opt=losumtw_opt/losumlw_opt  
@@ -194,13 +194,13 @@ for j in range(1,ntest):
 	Qsimplec_opt=Qsimplec_opt + qjc_opt[j]/(ntest-1)
 	Qsimplew_opt=Qsimplew_opt + qjw_opt[j]/(ntest-1)
 	
-	Qsegw_r + Qsegw_r + ((qjw_r  [j]-1.0)/(qjw_opt[j]-1.0))/(ntest-1)
-	Qsegc_r + Qsegc_r + ((qjc_r  [j]-1.0)/(qjc_opt[j]-1.0))/(ntest-1)
+	Qsegw_r = Qsegw_r + ((qjw_r  [j]-1.0)/(qjw_opt[j]-1.0))/(ntest-1)
+	Qsegc_r = Qsegc_r + ((qjc_r  [j]-1.0)/(qjc_opt[j]-1.0))/(ntest-1)
 	
-	numQdocc_r = (qjc_r  [j]-1.0)
-	denQdocc_r = (qjc_opt[j]-1.0)
-	numQdocw_r = (qjw_r  [j]-1.0)
-	denQdocw_r = (qjw_opt[j]-1.0)
+	numQdocc_r = numQdocc_r + (qjc_r  [j]-1.0)
+	denQdocc_r = denQdocc_r + (qjc_opt[j]-1.0)
+	numQdocw_r = numQdocw_r + (qjw_r  [j]-1.0)
+	denQdocw_r = denQdocw_r + (qjw_opt[j]-1.0)
     
 Qdocc_r=numQdocc_r/denQdocc_r
 Qdocw_r=numQdocw_r/denQdocw_r
@@ -218,6 +218,7 @@ print "Normalized mesaures"
 print "___________________"
 print "Q_seg(r,char)=",Qsegc_r
 print "Q_seg(r,words)=",Qsegw_r
+print ""
 print "Q_doc(r,char)=",Qdocc_r
 print "Q_doc(r,words)=",Qdocw_r
 print ""
