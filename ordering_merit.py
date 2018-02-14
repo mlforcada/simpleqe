@@ -194,8 +194,8 @@ for j in range(1,ntest):
 	Qsimplec_opt=Qsimplec_opt + qjc_opt[j]/(ntest-1)
 	Qsimplew_opt=Qsimplew_opt + qjw_opt[j]/(ntest-1)
 	
-	Qsegw_r + Qsegw_r + ((qjw_r  [j]-1.0)/(qjw_opt-1.0))/(ntest-1)
-	Qsegc_r + Qsegc_r + ((qjc_r  [j]-1.0)/(qjc_opt-1.0))/(ntest-1)
+	Qsegw_r + Qsegw_r + ((qjw_r  [j]-1.0)/(qjw_opt[j]-1.0))/(ntest-1)
+	Qsegc_r + Qsegc_r + ((qjc_r  [j]-1.0)/(qjc_opt[j]-1.0))/(ntest-1)
 	
 	numQdocc_r = (qjc_r  [j]-1.0)
 	denQdocc_r = (qjc_opt[j]-1.0)
