@@ -17,7 +17,7 @@
 #     q_j(r)-1 over [1,ntest-1] over the sum over q_j(opt)-1 over [1,ntest-1] 
 #     (supposed to vary between 0 and 1.
 #
-# (3) A per-document average of (q_j(r)-1)/(q_j(opt)-1), supposed to vary 
+# (3) A per-document normalization (Q_simple(r)-1)/(Q_simple(opt)-1), also supposed to vary 
 #     between 0 and 1.
 #
 # 
