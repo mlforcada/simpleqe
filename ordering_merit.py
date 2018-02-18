@@ -1,9 +1,8 @@
-# MLF 20180214
+# MLF 20180218
 # Read:
 # one sentence per line
 # post-editing time (one value per line)
 # post-editing time estimate (WMT result file: fields 3 and 4
-# a number between zero and one
 #
 # Then rank according to time per length, measured and estimated,
 # and compute three indicators of the merit of the estimated ranking
@@ -28,9 +27,7 @@
 import argparse
 from nltk.tokenize import word_tokenize
 import sys
-import math
-import numpy  # not sure I need this
-
+import numpy 
 
 reload(sys)
 sys.setdefaultencoding("utf-8")
@@ -108,11 +105,11 @@ itauestic = ntauestic.argsort()
 # ugly, ugly code.
 
 ntest=len(tmeas)
-# compute for every j
-qjc_r   = [0]*len(tmeas)
-qjc_opt = [0]*len(tmeas)
-qjw_r   = [0]*len(tmeas)
-qjw_opt = [0]*len(tmeas)
+# compute for every j from 1 to ntest-1 (0 not used).
+qjc_r   = [0]*ntest
+qjc_opt = [0]*ntest
+qjw_r   = [0]*ntest
+qjw_opt = [0]*ntest
  
 
 for j in range(1,ntest): # j varies from 1 to ntest-1, as in formulas
@@ -140,6 +137,7 @@ for j in range(1,ntest): # j varies from 1 to ntest-1, as in formulas
    uptc_r  =upsumtc_r  /upsumlc_r
    uptw_opt=upsumtw_opt/upsumlw_opt  
    uptc_opt=upsumtc_opt/upsumlc_opt      
+   
    # lower part
    losumtc_opt=0
    losumtw_opt=0
@@ -149,7 +147,7 @@ for j in range(1,ntest): # j varies from 1 to ntest-1, as in formulas
    losumtw_r  =0
    losumlc_r  =0
    losumlw_r  =0
-   for k in range(j,ntest): # k varies from j+1 to ntest-1; indexing has to be decremented
+   for k in range(j+1,ntest+1): # k varies from j+1 to ntest; indexing has to be decremented
        # print "k(lo)=",k
        losumtw_opt=losumtw_opt+            float(tmeas[itaumeasw[k-1]])
        losumtc_opt=losumtc_opt+            float(tmeas[itaumeasc[k-1]])
@@ -162,7 +160,8 @@ for j in range(1,ntest): # j varies from 1 to ntest-1, as in formulas
    lotw_r  =losumtw_r  /losumlw_r  
    lotc_r  =losumtc_r  /losumlc_r
    lotw_opt=losumtw_opt/losumlw_opt  
-   lotc_opt=losumtc_opt/losumlc_opt      
+   lotc_opt=losumtc_opt/losumlc_opt
+            
    # compute indicators for each j (do I need to store them?)
    qjc_r  [j]=uptc_r  /lotc_r
    qjc_opt[j]=uptc_opt/lotc_opt
@@ -178,11 +177,11 @@ Qsimplew_r  =0
 Qsimplew_opt=0
 Qsegw_r  =0
 Qsegc_r  =0
-for j in range(1,ntest):
-	Qsimplec_r  =Qsimplec_r   + qjc_r  [j]/(ntest-1)
-	Qsimplew_r  =Qsimplew_r   + qjw_r  [j]/(ntest-1)
-	Qsimplec_opt=Qsimplec_opt + qjc_opt[j]/(ntest-1)
-	Qsimplew_opt=Qsimplew_opt + qjw_opt[j]/(ntest-1)
+for j in range(1,ntest):  # j varies from 1 to ntest-1 as in previous main loop
+	Qsimplec_r  =Qsimplec_r   + qjc_r  [j]/(ntest-1.0)
+	Qsimplew_r  =Qsimplew_r   + qjw_r  [j]/(ntest-1.0)
+	Qsimplec_opt=Qsimplec_opt + qjc_opt[j]/(ntest-1.0)
+	Qsimplew_opt=Qsimplew_opt + qjw_opt[j]/(ntest-1.0)
 	
 	Qsegw_r = Qsegw_r + ((qjw_r  [j]-1.0)/(qjw_opt[j]-1.0))/(ntest-1)
 	Qsegc_r = Qsegc_r + ((qjc_r  [j]-1.0)/(qjc_opt[j]-1.0))/(ntest-1)
