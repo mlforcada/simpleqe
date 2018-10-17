@@ -1,4 +1,4 @@
-# MLF 20180218
+# MLF 20180218 / MEG 20181016
 # Read:
 # one sentence per line
 # post-editing time (one value per line)
